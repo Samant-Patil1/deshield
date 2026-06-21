@@ -1,4 +1,3 @@
-from difflib import SequenceMatcher
 
 from src.models import TyposquatFinding
 

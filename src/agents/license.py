@@ -1,12 +1,27 @@
 from google.adk.agents import Agent
 from google.adk.tools import FunctionTool
-from src.tools.license_data import check_compatibility
+from src.models import Ecosystem
+from src.tools.pypi import fetch_pypi_metadata, get_package_license
+from src.tools.license_data import check_package_license
 
 
 def analyze_licenses(deps: list[dict]) -> list[dict]:
-    licenses = [d.get("license") for d in deps if d.get("license")]
-    finding = check_compatibility(licenses, "proprietary")
-    return [finding.model_dump()] if finding.conflict else []
+    findings = []
+    for dep in deps:
+        if dep.get("ecosystem") != Ecosystem.PYTHON:
+            continue
+        name = dep.get("name")
+        version = dep.get("version")
+        if not name or not version:
+            continue
+        metadata = fetch_pypi_metadata(name, version)
+        license_expr = get_package_license(metadata)
+        if not license_expr:
+            continue
+        finding = check_package_license(name, version, license_expr, "proprietary")
+        if finding:
+            findings.append(finding.model_dump())
+    return findings
 
 
 license_agent = Agent(

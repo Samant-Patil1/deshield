@@ -1,4 +1,3 @@
-import pytest
 from src.tools.repo import clone_repo
 from src.config import settings
 

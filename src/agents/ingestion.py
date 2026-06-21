@@ -1,8 +1,7 @@
-from pathlib import Path
 from google.adk.agents import Agent
 from google.adk.tools import FunctionTool
 from src.tools.repo import clone_repo, validate_repo_url
-from src.tools.manifest import detect_manifests, parse_requirements_txt
+from src.tools.manifest import detect_manifests, parse_requirements_txt, parse_pyproject_toml
 from src.models import Dependency
 
 
@@ -14,6 +13,8 @@ def ingest_repo(repo_url: str) -> dict:
     for manifest in manifests:
         if manifest.name == "requirements.txt":
             deps.extend(parse_requirements_txt(manifest.read_text()))
+        elif manifest.name == "pyproject.toml":
+            deps.extend(parse_pyproject_toml(manifest.read_text()))
     return {
         "repo_path": str(repo_path),
         "dependencies": [d.model_dump() for d in deps],

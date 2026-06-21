@@ -14,6 +14,18 @@ def is_copyleft(license_expr: str | None) -> bool:
     return any(lic.upper() in upper for lic in COPYLEFT_LICENSES)
 
 
+def check_package_license(package: str, version: str, license_expr: str | None, target_policy: str) -> LicenseFinding | None:
+    if is_copyleft(license_expr) and target_policy == "proprietary":
+        return LicenseFinding(
+            package=package,
+            version=version,
+            license_expr=license_expr,
+            is_copyleft=True,
+            conflict=f"Copyleft license {license_expr} is incompatible with proprietary distribution",
+        )
+    return None
+
+
 def check_compatibility(licenses: list[str], target_policy: str) -> LicenseFinding:
     for lic in licenses:
         if is_copyleft(lic) and target_policy == "proprietary":
