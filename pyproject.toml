@@ -1,0 +1,29 @@
+[project]
+name = "deshield"
+version = "0.1.0"
+description = "AI-powered software supply chain risk agent"
+requires-python = ">=3.11"
+dependencies = [
+    "google-adk>=0.1.0",
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.29.0",
+    "jinja2>=3.1.3",
+    "pydantic>=2.7.0",
+    "pydantic-settings>=2.2.0",
+    "httpx>=0.27.0",
+    "gitpython>=3.1.42",
+    "networkx>=3.2.1",
+    "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.1.0",
+    "pytest-asyncio>=0.23.5",
+    "respx>=0.21.0",
+    "ruff>=0.4.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
