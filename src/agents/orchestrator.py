@@ -1,6 +1,5 @@
 from pathlib import Path
 import json
-import logging
 
 from google.adk.agents import Agent
 from google.adk.tools import FunctionTool
@@ -15,8 +14,9 @@ from src.tools.secrets_scanner import scan_secrets
 from src.models import Dependency, Ecosystem, AnalysisResult
 from src.agents.synthesizer import synthesize_risks
 from src.agents.report import render_html, render_markdown
+from src.utils.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def analyze_repo(repo_url: str) -> dict:
