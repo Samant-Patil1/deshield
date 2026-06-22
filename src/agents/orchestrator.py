@@ -97,7 +97,7 @@ def analyze_repo(repo_url: str) -> dict:
 
 orchestrator_agent = Agent(
     name="deshield_orchestrator",
-    model="gemini-2.5-flash",
+    model="gemini-2.0-flash",
     instruction="You are DepShield. When given a GitHub repository URL, call analyze_repo and return the HTML report.",
     tools=[FunctionTool(analyze_repo)],
 )

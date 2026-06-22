@@ -14,7 +14,7 @@ def analyze_typosquats(deps: list[dict], popular_packages: list[str]) -> list[di
 
 typosquat_agent = Agent(
     name="typosquat_agent",
-    model="gemini-2.5-flash",
+    model="gemini-2.0-flash",
     instruction="Detect typosquatting risks in dependency names.",
     tools=[FunctionTool(analyze_typosquats)],
 )

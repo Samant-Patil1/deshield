@@ -32,7 +32,7 @@ def analyze_maintenance(deps: list[dict]) -> list[dict]:
 
 maintenance_agent = Agent(
     name="maintenance_agent",
-    model="gemini-2.5-flash",
+    model="gemini-2.0-flash",
     instruction="Score dependency maintenance risk using PyPI metadata.",
     tools=[FunctionTool(analyze_maintenance)],
 )

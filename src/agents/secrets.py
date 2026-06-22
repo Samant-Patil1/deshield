@@ -11,7 +11,7 @@ def analyze_secrets(repo_path: str) -> list[dict]:
 
 secrets_agent = Agent(
     name="secrets_agent",
-    model="gemini-2.5-flash",
+    model="gemini-2.0-flash",
     instruction="Scan a cloned repository for potential secret leaks.",
     tools=[FunctionTool(analyze_secrets)],
 )

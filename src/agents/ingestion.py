@@ -25,7 +25,7 @@ def ingest_repo(repo_url: str) -> dict:
 
 ingestion_agent = Agent(
     name="ingestion_agent",
-    model="gemini-2.5-flash",
+    model="gemini-2.0-flash",
     instruction="You ingest a GitHub repository and return its Python and Node.js dependencies.",
     tools=[FunctionTool(ingest_repo)],
 )

@@ -26,7 +26,7 @@ def analyze_licenses(deps: list[dict]) -> list[dict]:
 
 license_agent = Agent(
     name="license_agent",
-    model="gemini-2.5-flash",
+    model="gemini-2.0-flash",
     instruction="Detect license conflicts in dependencies.",
     tools=[FunctionTool(analyze_licenses)],
 )
