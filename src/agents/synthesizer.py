@@ -67,6 +67,18 @@ def synthesize_risks(
         )
 
     for finding in maintenance_findings:
+        if finding.score.value == "healthy":
+            continue
+        last_release = (
+            f"Last release {finding.last_release_days} days ago"
+            if finding.last_release_days is not None
+            else "Release date unknown"
+        )
+        maintainers = (
+            f"{finding.maintainers} maintainer{'s' if finding.maintainers != 1 else ''}"
+            if finding.maintainers is not None
+            else "maintainer count unknown"
+        )
         issues.append(
             RiskIssue(
                 package=finding.package,
@@ -74,7 +86,7 @@ def synthesize_risks(
                 category="maintenance",
                 severity="high" if finding.score.value == "abandoned" else "medium",
                 title=f"Maintenance risk: {finding.score.value}",
-                description=f"Last release {finding.last_release_days} days ago; {finding.maintainers} maintainers",
+                description=f"{last_release}; {maintainers}",
                 recommendation="Consider migrating to an actively maintained alternative",
             )
         )
