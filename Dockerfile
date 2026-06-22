@@ -11,6 +11,9 @@ RUN apt-get update \
 COPY pyproject.toml ./
 RUN pip install --no-cache-dir -e "."
 
+# Ensure imports like `src.*` work from the project root
+ENV PYTHONPATH=/app
+
 # Copy application code
 COPY . .
 
