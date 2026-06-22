@@ -1,0 +1,6 @@
+{
+  "name": "DepShield",
+  "description": "AI-powered software supply chain risk and remediation agent",
+  "entrypoint": "src.run_cli:main",
+  "runtime": "python"
+}
