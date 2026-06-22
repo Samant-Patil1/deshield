@@ -27,11 +27,20 @@ def get_package_license(metadata: dict) -> str | None:
     return None
 
 
-def score_maintenance(metadata: dict) -> MaintenanceScore:
+def score_maintenance(metadata: dict) -> MaintenanceScore | None:
+    if not metadata:
+        return None
     info = metadata.get("info", {})
-    maintainers = len(info.get("maintainers") or [])
-    if maintainers == 0:
+    maintainers = info.get("maintainers")
+    if maintainers:
+        count = len(maintainers)
+    else:
+        # Fall back to author/maintainer strings when maintainers list is absent
+        count = len(
+            [x for x in [info.get("author"), info.get("maintainer")] if x]
+        )
+    if count == 0:
         return MaintenanceScore.ABANDONED
-    if maintainers == 1:
+    if count == 1:
         return MaintenanceScore.RISKY_TRANSFER
     return MaintenanceScore.HEALTHY

@@ -9,10 +9,18 @@ def analyze_maintenance(deps: list[dict]) -> list[dict]:
     for dep in deps:
         metadata = fetch_pypi_metadata(dep["name"], dep["version"])
         score = score_maintenance(metadata)
+        if score is None:
+            continue
+        info = metadata.get("info", {})
+        maintainers = info.get("maintainers")
+        maintainer_count = len(maintainers) if maintainers else len(
+            [x for x in [info.get("author"), info.get("maintainer")] if x]
+        )
         findings.append(MaintenanceFinding(
             package=dep["name"],
             version=dep["version"],
             score=score,
+            maintainers=maintainer_count,
         ).model_dump())
     return findings
 
