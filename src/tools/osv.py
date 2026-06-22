@@ -29,7 +29,7 @@ def query_osv(package: str, version: str, ecosystem: Ecosystem) -> list[Vulnerab
                 id=v.get("id", "UNKNOWN"),
                 summary=v.get("summary"),
                 severity=severity.get("type") if isinstance(severity, dict) else None,
-                cvss_score=None,
+                cvss_score=_extract_cvss_score(v),
                 fixed_version=_extract_fixed_version(v),
                 aliases=v.get("aliases", []),
             )
@@ -43,4 +43,14 @@ def _extract_fixed_version(vuln: dict) -> str | None:
             for event in ranges.get("events", []):
                 if "fixed" in event:
                     return event["fixed"]
+    return None
+
+
+def _extract_cvss_score(vuln: dict) -> float | None:
+    for sev in vuln.get("severity", []):
+        if isinstance(sev, dict) and "score" in sev:
+            try:
+                return float(sev["score"])
+            except (ValueError, TypeError):
+                continue
     return None

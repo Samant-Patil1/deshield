@@ -1,7 +1,6 @@
 from src.models import (
     AnalysisResult,
     Dependency,
-    Ecosystem,
     RiskIssue,
     Vulnerability,
     LicenseFinding,
@@ -33,7 +32,9 @@ def synthesize_risks(
     secret_findings: list[SecretFinding],
 ) -> AnalysisResult:
     issues: list[RiskIssue] = []
-    dep_key = lambda d: f"{d.name}=={d.version}"
+
+    def dep_key(dep: Dependency) -> str:
+        return f"{dep.name}=={dep.version}"
 
     for dep in deps:
         key = dep_key(dep)

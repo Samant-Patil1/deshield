@@ -4,7 +4,7 @@ from pydantic import Field
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_prefix="DEPSHIELD_")
 
-    google_api_key: str = Field(alias="GOOGLE_API_KEY")
+    google_api_key: str = Field(default="missing", alias="GOOGLE_API_KEY")
     github_token: str | None = Field(default=None, alias="GITHUB_TOKEN")
     env: str = "development"
     max_repo_size_mb: int = 50

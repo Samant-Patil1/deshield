@@ -7,42 +7,86 @@ from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai.types import Content, Part
 
-from src.tools.repo import clone_repo
-from src.tools.manifest import detect_manifests, parse_requirements_txt, parse_pyproject_toml
-from src.tools.osv import query_osv
-from src.tools.secrets_scanner import scan_secrets
-from src.models import Dependency, Ecosystem, AnalysisResult
+from src.agents.ingestion import ingest_repo
+from src.agents.vulnerability import find_vulnerabilities
+from src.agents.license import analyze_licenses
+from src.agents.maintenance import analyze_maintenance
+from src.agents.typosquat import analyze_typosquats
+from src.agents.secrets import analyze_secrets
 from src.agents.synthesizer import synthesize_risks
 from src.agents.report import render_html, render_markdown
+from src.models import (
+    Dependency,
+    Vulnerability,
+    LicenseFinding,
+    MaintenanceFinding,
+    TyposquatFinding,
+    SecretFinding,
+)
 from src.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
+POPULAR_PACKAGES = [
+    "requests",
+    "flask",
+    "django",
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "scipy",
+    "scikit-learn",
+    "tensorflow",
+    "pytorch",
+    "pytest",
+    "celery",
+    "redis",
+    "sqlalchemy",
+    "boto3",
+    "fastapi",
+    "pydantic",
+    "httpx",
+    "jinja2",
+]
+
 
 def analyze_repo(repo_url: str) -> dict:
-    repo_path = clone_repo(repo_url)
-    manifests = detect_manifests(repo_path)
-    deps: list[Dependency] = []
-    for manifest in manifests:
-        if manifest.name == "requirements.txt":
-            deps.extend(parse_requirements_txt(manifest.read_text()))
-        elif manifest.name == "pyproject.toml":
-            deps.extend(parse_pyproject_toml(manifest.read_text()))
+    ingest_result = ingest_repo(repo_url)
+    repo_path = Path(ingest_result["repo_path"])
+    deps = [Dependency(**d) for d in ingest_result["dependencies"]]
 
-    vulns_by_dep: dict[str, list] = {}
-    for dep in deps:
-        key = f"{dep.name}=={dep.version}"
-        vulns_by_dep[key] = query_osv(dep.name, dep.version, dep.ecosystem)
+    vulns_by_dep: dict[str, list[Vulnerability]] = {}
+    license_findings: list[LicenseFinding] = []
+    maintenance_findings: list[MaintenanceFinding] = []
+    typosquat_findings: list[TyposquatFinding] = []
 
-    secrets = scan_secrets(repo_path)
+    if deps:
+        dep_dicts = [d.model_dump() for d in deps]
+        for dep in deps:
+            key = f"{dep.name}=={dep.version}"
+            vulns_by_dep[key] = [
+                Vulnerability(**v)
+                for v in find_vulnerabilities([dep.model_dump()])
+            ]
+        license_findings = [LicenseFinding(**f) for f in analyze_licenses(dep_dicts)]
+        maintenance_findings = [
+            MaintenanceFinding(**f) for f in analyze_maintenance(dep_dicts)
+        ]
+        typosquat_findings = [
+            TyposquatFinding(**f)
+            for f in analyze_typosquats(dep_dicts, POPULAR_PACKAGES)
+        ]
+
+    secret_findings = [SecretFinding(**f) for f in analyze_secrets(str(repo_path))]
+
     result = synthesize_risks(
         repo_url=repo_url,
         deps=deps,
         vulnerabilities=vulns_by_dep,
-        license_findings=[],
-        maintenance_findings=[],
-        typosquat_findings=[],
-        secret_findings=secrets,
+        license_findings=license_findings,
+        maintenance_findings=maintenance_findings,
+        typosquat_findings=typosquat_findings,
+        secret_findings=secret_findings,
     )
     return {
         "html": render_html(result),
@@ -61,7 +105,7 @@ orchestrator_agent = Agent(
 
 async def run_analysis(repo_url: str) -> dict:
     session_service = InMemorySessionService()
-    session = session_service.create_session(app_name="deshield", user_id="user")
+    session = await session_service.create_session(app_name="deshield", user_id="user")
     runner = Runner(
         agent=orchestrator_agent,
         app_name="deshield",

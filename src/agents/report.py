@@ -1,4 +1,3 @@
-import json
 from jinja2 import Environment, PackageLoader, select_autoescape
 from src.models import AnalysisResult
 from src.agents.remediation import generate_remediation_plan

@@ -71,13 +71,13 @@ See [`docs/architecture.md`](docs/architecture.md) for a detailed data-flow desc
 
 5. Run the CLI against a public repo:
    ```bash
-   python src/main.py --repo https://github.com/owner/repo
+   python -m src.main --repo https://github.com/owner/repo
    ```
 
 ## Run Web UI
 
 ```bash
-python src/main.py --serve
+python -m src.main --serve
 ```
 
 Then open http://localhost:8080, paste a GitHub repository URL, and submit.
